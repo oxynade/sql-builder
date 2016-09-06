@@ -1087,4 +1087,34 @@ class Select extends AbstractQuery implements SelectInterface, SubselectInterfac
             $column = $alias . '.' . $column;
         }
     }
+
+    /**
+     * Get merge data from current query, it's used for merge method
+     * @param Select $query
+     */
+    public function getMergeDetails()
+    {
+        $from = $this->from[$this->from_key];
+        // remove basic FROM
+        unset($from[0]);
+        return array(
+            'from' => $from,
+            'where' => $this->where,
+            'bind_values' => $this->bind_values,
+        );
+    }
+
+    /**
+     * Merge query into current query
+     * TODO: merge other parts
+     */
+    public function merge(array $mergeDetails)
+    {
+        $this->from[$this->from_key] = array_merge($this->from[$this->from_key], $mergeDetails['from']);
+        if (!empty($mergeDetails['where'])) {
+            $this->where[] = "AND " . array_shift($mergeDetails['where']);
+            $this->where = array_merge($this->where, $mergeDetails['where']);
+        }
+        $this->bind_values = array_replace($this->bind_values, $mergeDetails['bind_values']);
+    }
 }
