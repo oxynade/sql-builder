@@ -477,8 +477,14 @@ abstract class AbstractQuery
      */
     protected function addOrderBy(array $spec)
     {
-        foreach ($spec as $col) {
-            $this->order_by[] = $this->quoter->quoteNamesIn($col);
+        foreach ($spec as $column => $orderSpecification) {
+            $quotedSpec = $this->quoter->quoteNamesIn($orderSpecification);
+            // needed for case when column is not specified
+            if (is_numeric($column)) {
+                $this->order_by[] = $quotedSpec;
+            } else {
+                $this->order_by[$column] = $quotedSpec;
+            }
         }
         return $this;
     }
