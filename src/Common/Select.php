@@ -369,14 +369,7 @@ class Select extends AbstractQuery implements SelectInterface, SubselectInterfac
      */
     protected function addTableRef($type, $spec)
     {
-        $name = $spec;
-
-        $name = str_replace(array($this->getQuoteNamePrefix(), $this->getQuoteNameSuffix()), '', $name);
-
-        $pos = strripos($name, ' AS ');
-        if ($pos !== false) {
-            $name = trim(substr($name, $pos + 4));
-        }
+        $name = $this->getTableRefName($spec);
 
         if (isset($this->table_refs[$name])) {
             $used = $this->table_refs[$name];
@@ -1116,5 +1109,24 @@ class Select extends AbstractQuery implements SelectInterface, SubselectInterfac
             $this->where = array_merge($this->where, $mergeDetails['where']);
         }
         $this->bind_values = array_replace($this->bind_values, $mergeDetails['bind_values']);
+    }
+
+    /**
+     * @param string $spec
+     *
+     * @return string
+     */
+    protected function getTableRefName($spec)
+    {
+        $name = $spec;
+
+        $name = str_replace(array($this->getQuoteNamePrefix(), $this->getQuoteNameSuffix()), '', $name);
+
+        $pos = strripos($name, ' AS ');
+        if ($pos !== false) {
+            $name = trim(substr($name, $pos + 4));
+        }
+
+        return $name;
     }
 }

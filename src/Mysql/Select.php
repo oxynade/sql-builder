@@ -19,6 +19,8 @@ use Aura\SqlQuery\Common;
  */
 class Select extends Common\Select
 {
+    const UNION_SUB_SELECT_QUERY_NAME = 'unionSubSelect';
+
     /**
      *
      * Adds or removes SQL_CALC_FOUND_ROWS flag.
@@ -149,5 +151,25 @@ class Select extends Common\Select
     {
         $value = Util::correctBindValue($value);
         return parent::bindValue($name, $value);
+    }
+
+    /**
+     * Add INNER join with subselect which emulate UNION behavior
+     *
+     * @param string $spec
+     * @param string $cond
+     * @param array $bind
+     *
+     * @return self
+     */
+    public function joinUnionSubSelect($spec, $cond = null, array $bind = array())
+    {
+        $tableRefName = $this->getTableRefName(self::UNION_SUB_SELECT_QUERY_NAME);
+        if (!empty($this->table_refs[$tableRefName])) {
+            // only for case sub select for UNION check if table ref aready exists
+            // since this subselect is combined manually at each make
+            return $this;
+        }
+        return parent::joinSubSelect('INNER', $spec, self::UNION_SUB_SELECT_QUERY_NAME, $cond, $bind);
     }
 }
