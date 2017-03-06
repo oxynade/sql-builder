@@ -431,6 +431,7 @@ abstract class AbstractQuery
         // handle IN(?)
         $needle = 'IN(:';
         foreach ($this->where as &$where) {
+            $where = str_replace('IN (:', $needle, $where);
             $origin = 0;
             while (false !== $pos = stripos($where, $needle, $origin)) {
                 // check if we have a match; check if bind value exists; check if reach the end
