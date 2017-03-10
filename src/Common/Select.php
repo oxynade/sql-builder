@@ -214,6 +214,14 @@ class Select extends AbstractQuery implements SelectInterface, SubselectInterfac
     }
 
     /**
+     * @return bool
+     */
+    public function getForUpdate()
+    {
+        return $this->for_update;
+    }
+
+    /**
      *
      * Makes the select DISTINCT (or not).
      *
