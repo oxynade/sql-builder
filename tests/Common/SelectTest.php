@@ -504,7 +504,8 @@ class SelectTest extends AbstractQueryTest
     public function testMerge()
     {
         $this->query->cols(array('*'))
-            ->from('t1')
+            ->from('t10')
+            ->join('left', 't11', 't10.id = t11.id')
             ->where('c101 = c102')
             ->where('c103 = ?', 'foo')
             ->groupBy(array('c104', 'c105'))
@@ -513,8 +514,8 @@ class SelectTest extends AbstractQueryTest
 
         $merge = array(
             'from' => array(
-                'INNER JOIN t2',
-                'LEFT JOIN t3',
+                'INNER JOIN t20',
+                'LEFT JOIN t21',
             ),
             'where' => array(
                 'c201 = c202',
@@ -537,11 +538,12 @@ class SelectTest extends AbstractQueryTest
         $actual = $this->query->__toString();
         $expect = '
             SELECT
-                <<t1>>.*
+                <<t10>>.*
             FROM
-                <<t1>>
-                INNER JOIN t2
-                LEFT JOIN t3
+                <<t10>>
+                LEFT JOIN <<t11>> ON <<t10>>.<<id>> = <<t11>>.<<id>>
+                INNER JOIN t20
+                LEFT JOIN t21
             WHERE
                 c101 = c102
                 AND c103 = :_1_
