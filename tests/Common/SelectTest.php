@@ -501,6 +501,75 @@ class SelectTest extends AbstractQueryTest
         $this->assertSame($expect, $actual);
     }
 
+    public function testMerge()
+    {
+        $this->query->cols(array('*'))
+            ->from('t10')
+            ->join('left', 't11', 't10.id = t11.id')
+            ->where('c101 = c102')
+            ->where('c103 = ?', 'foo')
+            ->groupBy(array('c104', 'c105'))
+            ->having('c106 = c107')
+            ->having('c108 = c109');
+
+        $merge = array(
+            'from' => array(
+                'INNER JOIN t20',
+                'LEFT JOIN t21',
+            ),
+            'where' => array(
+                'c201 = c202',
+                'AND c203 = c204',
+            ),
+            'bind_values' => array(
+                'c205' => 'foo',
+            ),
+            'group_by' => array(
+                'c206',
+                'c207',
+            ),
+            'having' => array(
+                'c208 = c209',
+                'AND c210 = c211',
+            ),
+        );
+        $this->query->merge($merge);
+
+        $actual = $this->query->__toString();
+        $expect = '
+            SELECT
+                <<t10>>.*
+            FROM
+                <<t10>>
+                LEFT JOIN <<t11>> ON <<t10>>.<<id>> = <<t11>>.<<id>>
+                INNER JOIN t20
+                LEFT JOIN t21
+            WHERE
+                c101 = c102
+                AND c103 = :_1_
+                AND c201 = c202
+                AND c203 = c204
+            GROUP BY
+                c104,
+                c105,
+                c206,
+                c207
+            HAVING
+                c106 = c107
+                AND c108 = c109
+                AND c208 = c209
+                AND c210 = c211
+        ';
+        $this->assertSameSql($expect, $actual);
+
+        $actual = $this->query->getBindValues();
+        $expect = array(
+            '_1_' => 'foo',
+            'c205' => 'foo',
+        );
+        $this->assertSame($expect, $actual);
+    }
+
     public function testOrWhere()
     {
         $this->query->cols(array('*'));
