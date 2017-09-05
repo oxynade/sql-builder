@@ -1099,7 +1099,6 @@ class Select extends AbstractQuery implements SelectInterface, SubselectInterfac
         // remove basic FROM
         unset($from[0]);
         return array(
-            'cols' => $this->cols,
             'from' => $from,
             'where' => $this->where,
             'group_by' => $this->group_by,
@@ -1114,12 +1113,10 @@ class Select extends AbstractQuery implements SelectInterface, SubselectInterfac
      */
     public function merge(array $mergeDetails)
     {
-        if (!empty($mergeDetails['cols'])) {
-            $this->cols = array_merge($this->cols, $mergeDetails['cols']);
-        }
         $this->from[$this->from_key] = array_merge($this->from[$this->from_key], $mergeDetails['from']);
         if (!empty($mergeDetails['where'])) {
-            $this->addClauseCondWithBind('where', 'AND', $mergeDetails['where']);
+            $this->where[] = (count($this->where) ?  "AND " : '')  . array_shift($mergeDetails['where']);
+            $this->where = array_merge($this->where, $mergeDetails['where']);
         }
         $this->bind_values = array_replace($this->bind_values, $mergeDetails['bind_values']);
 
@@ -1127,7 +1124,8 @@ class Select extends AbstractQuery implements SelectInterface, SubselectInterfac
             $this->group_by = array_merge($this->group_by, $mergeDetails['group_by']);
         }
         if (!empty($mergeDetails['having'])) {
-            $this->addClauseCondWithBind('having', 'AND', $mergeDetails['having']);
+            $this->having[] = (count($this->having) ?  "AND " : '')  . array_shift($mergeDetails['having']);
+            $this->having = array_merge($this->having, $mergeDetails['having']);
         }
 
     }
